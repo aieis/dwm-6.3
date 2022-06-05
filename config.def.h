@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <X11/XF86keysym.h>
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
@@ -60,6 +61,31 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
+/* Media Controls */
+static const char *raisevolcmd[] = {"/bin/sh", "-c", "amixer sset Master 5%+; kill -44 $(pidof dwmblocks)"};
+static const char *lowervolcmd[] = {"/bin/sh", "-c", "amixer sset Master 5%-; kill -44 $(pidof dwmblocks)"};
+static const char *mutecmd[]     = {"/bin/sh", "-c", "amixer sset Master toggle; kill -44 $(pidof dwmblocks)"};
+static const char *nextmediacmd[] = {"playerctl", "--all-players", "next", NULL};
+static const char *prevmediacmd[] = {"playerctl", "--all-players", "prev", NULL};
+static const char *playmediacmd[] = {"playerctl", "--all-players", "play-pause", NULL};
+
+/* Brightness Controls */
+static const char *downbrightcmd[] = {"xbacklight", "-dec", "10", NULL};
+static const char *upbrightcmd[] = {"xbacklight", "-inc", "10", NULL};
+
+/* Power options */
+static const char *choosepower[] = {"poweroptsdmenu", NULL};
+
+/* Program Startup Shortcuts */
+static const char *startranger[] = {"st", "-n", "fileman", "-e", "ranger", NULL};
+static const char *startmail[] = {"st", "-n", "mailclient","-e", "neomutt", NULL};
+static const char *startbrowser[] = {"firefox", "-p", NULL};
+static const char *startemacs[] = {"emacsclient", "-c", "-a", "",  NULL};
+
+/* Screen Shot */
+static const char *screenshotcmd[] = {"scrot-select", NULL};
+
+
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
@@ -67,9 +93,29 @@ static const char *termcmd[]  = { "st", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+  	{ MODKEY, 			XK_e,	  				spawn,	   	{.v = startranger } },
+	{ MODKEY|ShiftMask,		XK_e,	  				spawn,	   	{.v = startmail } },
+	{ MODKEY|ShiftMask,		XK_s,					spawn,		{.v = screenshotcmd } },
+	{ MODKEY,			XK_b,					spawn,		{.v = startbrowser } },
+	{ MODKEY|ShiftMask,             XK_b,     				togglebar,      {0} },
+	{ MODKEY,                       XK_n,                                   spawn,          {.v = startemacs } },
+	{ 0,				XF86XK_AudioRaiseVolume,		spawn,		{.v = raisevolcmd } },
+	{ 0,				XF86XK_AudioLowerVolume,		spawn,		{.v = lowervolcmd } },
+	{ 0,				XF86XK_AudioMute,			spawn,		{.v = mutecmd } },
+	{ 0,				XF86XK_MonBrightnessDown,		spawn,		{.v = downbrightcmd } },
+	{ 0,				XF86XK_MonBrightnessUp,			spawn,		{.v = upbrightcmd } },
+	{ 0,				XF86XK_AudioNext,			spawn,		{.v = nextmediacmd } },
+	{ 0, 				XF86XK_AudioPrev,			spawn,		{.v = prevmediacmd } },
+	{ 0,				XF86XK_AudioPlay,			spawn,		{.v = playmediacmd } },
+	{ 0,				XK_F12,					spawn, 		{.v = choosepower } },
+	{ MODKEY,	                XK_F11,     				setlayout,      {.v = &layouts[2]} },
+	{ 0,                       	XK_F7,      				view,           {.ui = 1 << 7} },
+	{ 0,                       	XK_F1,      				view,           {.ui = 1 << 0} }, \
+	{ 0,                       	XK_F2,      				view,           {.ui = 1 << 1} }, \
+	{ 0,                       	XK_F3,      				view,           {.ui = 1 << 2} }, \
+	{ 0,                            XK_F4,   				view,           {0} },
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
